@@ -13,22 +13,12 @@ def hello_world():
 
     return render_template('gallery.html', images=images)
 
-#@app.route("/draw", methods=["GET"])
-#def draw_new_image():
-#    return render_template("draw.html")
-
 @app.route("/", methods=["POST"])
 def push_new_image():
-    #print("Received: ", request.files)
-    #for key, value in request.files.items():
-    #    value.save("storage/" + key + ".png")
-    #print(request.files["file"])
-    s = request.stream
     newfilename = str(uuid4())
-    print("Received stream: ", s)
-    with open(f"static/storage/{newfilename}.png", "wb") as f:
-        while (buf := s.read(16384)):
-            f.write(buf)
+
+    f = request.files["file"]
+    f.save(f"static/storage/{newfilename}.png")
     return ('', 204)
 
 if __name__ == "__main__":

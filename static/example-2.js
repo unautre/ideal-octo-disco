@@ -102,13 +102,15 @@ if(window.addEventListener) {
           canvas.toBlob(blob => {
             console.log("Found blob: ", blob);
 
+            var fd = new FormData();
+            fd.append("file", blob);
+
             var xhr = new XMLHttpRequest();
             xhr.onload = () => {
                 console.log("sent image !");
             }
-
             xhr.open("POST", "/", true);
-            xhr.send(blob);
+            xhr.send(fd);
           }, "image/png");
       }
     
