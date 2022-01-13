@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Canvas Paint - Gallery</title>
+</head>
+
+<body>
+    <p>Gallery of previous drawings</p>
+{% for image in images %}
+    <div class="image_holder">
+        <img src="{{ image }}" />
+    </div>
+{% endfor %}
+</body>
+
+</html>
