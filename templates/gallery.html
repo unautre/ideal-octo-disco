@@ -8,11 +8,13 @@
 
 <body>
     <p>Gallery of previous drawings</p>
+    <p>To add another, <a href="static/index.html">click here</a>.</p>
 {% for image in images %}
     <div class="image_holder">
         <img src="{{ image }}" />
     </div>
 {% endfor %}
+
 </body>
 
 </html>
