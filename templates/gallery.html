@@ -4,16 +4,27 @@
 <head>
     <meta charset="utf-8">
     <title>Canvas Paint - Gallery</title>
+    <style type="text/css">
+        .flexcontainer {
+            display: flex;
+            flex-flow: row wrap;
+        }
+        .image_holder {
+            border: solid 1px black;
+        }
+    </style>
 </head>
 
 <body>
     <p>Gallery of previous drawings</p>
     <p>To add another, <a href="static/index.html">click here</a>.</p>
+    <div class="flexcontainer">
 {% for image in images %}
-    <div class="image_holder">
-        <img src="{{ image }}" />
-    </div>
+        <div class="image_holder">
+            <img src="{{ image }}" />
+        </div>
 {% endfor %}
+    </div>
 
 </body>
 
