@@ -43,7 +43,21 @@ if(window.addEventListener) {
 
         var bouton = document.getElementById("sendbutton");
         console.log("Found bouton: ", bouton);
-        bouton.addEventListener("click", send_canvas, false);
+        bouton.addEventListener("click", () => {
+          canvas.toBlob(blob => {
+            var fd = new FormData();
+            fd.append("file", blob);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/", true);
+            xhr.send(fd);
+          }, "image/png");
+        }, false);
+
+        var clearbouton = document.getElementById("clearbutton");
+        clearbouton.addEventListener("click", () => {
+          context.clearRect(0, 0, canvas.width, canvas.height);
+        }, false);
       }
     
       // This painting tool works like a drawing pencil which tracks the mouse 
@@ -98,17 +112,11 @@ if(window.addEventListener) {
       }
 
       function send_canvas() {
-          console.log("Received click on sendbutton");
           canvas.toBlob(blob => {
-            console.log("Found blob: ", blob);
-
             var fd = new FormData();
             fd.append("file", blob);
 
             var xhr = new XMLHttpRequest();
-            xhr.onload = () => {
-                console.log("sent image !");
-            }
             xhr.open("POST", "/", true);
             xhr.send(fd);
           }, "image/png");
