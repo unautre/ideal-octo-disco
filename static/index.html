@@ -8,27 +8,114 @@
         #container {
             position: relative;
         }
-
-        #imageView {
+        
+        canvas {
             border: 1px solid #000;
+            position: absolute;
+            left: 0;
+            top: 0;
+            background-color: transparent;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"
+        integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA=="
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        var socket = io();
+
+        window.addEventListener('load', function () {
+            /*** background canvas stuff ***/
+            (() => {
+                let canvas = document.getElementById('layBG');
+                let context = canvas.getContext('2d');
+
+                context.globalAlpha = 0.5;
+
+                socket.on('stroke', function(stroke) {
+                    console.log("received stroke: ", stroke);
+                    console.log("Drawing on context: ", context, " canvas: ", canvas);
+                    context.beginPath();
+
+                    var i = 0;
+                    for (let point of stroke) {
+                        if (i == 0) {
+                            context.moveTo(point.x, point.y);
+                        } else {
+                            context.lineTo(point.x, point.y);
+                            context.stroke();
+                        }
+                        i++;
+                    }
+                    console.log("stroked: ", i);
+                });
+            })();
+
+            /*** foreground canvas stuff ***/
+            (() => {    
+                let canvas = document.getElementById('layFG');
+                let context = canvas.getContext('2d');
+                context.globalAlpha = 0.5;
+
+                console.log("Drawing on context: ", context, " canvas: ", canvas);
+
+                let current_move = {"active": false, data: []};
+
+                canvas.addEventListener('mousedown', (ev) => {
+                    // start drawing
+                    context.beginPath();
+                    context.moveTo(ev.offsetX, ev.offsetX);
+
+                    // start recording move
+                    current_move.active = true;
+                    current_move.data.push({"x":ev.offsetX, "y":ev.offsetY});
+                }, false);
+
+                /* continue recording move if active */
+                canvas.addEventListener('mousemove', (ev) => {
+                    if (current_move.active) {
+                        // continue drawing
+                        context.lineTo(ev.offsetX, ev.offsetY);
+                        context.stroke();
+
+                        // continue recording
+                        current_move.data.push({"x":ev.offsetX, "y":ev.offsetY});
+                    }
+                }, false);
+
+                canvas.addEventListener('mouseup', (ev) => {
+                    if (current_move.active) {
+                        // finish drawing
+                        context.lineTo(ev.offsetX, ev.offsetY);
+                        context.stroke();
+                        
+                        // finish recording
+                        current_move.data.push({"x":ev.offsetX, "y":ev.offsetY});
+
+                        // send stroke
+                        socket.emit('stroke', current_move.data);
+
+                        // reset memory
+                        current_move.active = false;
+                        current_move.data = [];
+
+                        // clear rect
+                        context.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                }, false);
+            })();
+        });
+    </script>
 </head>
 
 <body>
     <p>Hold down the mouse button to draw in the rectangle below.</p>
-    <div id="container"><canvas id="imageView" width="400" height="300">
-            <p>Unfortunately, your browser is currently unsupported by our web application. We are sorry for the
-                inconvenience. Please use one of the supported browsers listed below, or draw the image you want using
-                an offline tool.</p>
-            <p>Supported browsers: <a href="http://www.opera.com">Opera</a>, <a
-                    href="http://www.mozilla.com">Firefox</a>, <a href="http://www.apple.com/safari">Safari</a>, and <a
-                    href="http://www.konqueror.org">Konqueror</a>.</p>
-        </canvas></div>
-        <input type="button" id="sendbutton" value="Send canvas" />
-        <input type="button" id="clearbutton" value="Clear canvas" />
-        <p>To go back to the gallery, <a href="/">click here</a>.</p>
-    <script type="text/javascript" src="example-2.js"></script>
+    <div id="container">
+        <canvas id="layBG" width="500" height="500" style="z-index: 1;">
+        </canvas> 
+        <canvas id="layFG" width="500" height="500" style="z-index: 2;">
+        </canvas>
+  </div>
+    <input type="button" id="clearbutton" value="Clear canvas" />
 </body>
 
 </html>

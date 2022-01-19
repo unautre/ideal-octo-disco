@@ -1,25 +1,33 @@
 #!/usr/bin/env python3
 
 from flask import Flask, render_template, request
+from flask_socketio import SocketIO, send, emit
+
 from glob import glob
-from uuid import uuid4
+from uuid import uuid4 as uuid
 
 app = Flask(__name__)
+#app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app)
 
 @app.route("/", methods=["GET"])
 def hello_world():
-    # load images from storage
-    images = glob("static/storage/*.png")
+    return app.send_static_file("index.html")
 
-    return render_template('gallery.html', images=images)
+@socketio.on('connect')
+def on_connect(auth):
+    print("Someone connected: ", auth)
 
-@app.route("/", methods=["POST"])
-def push_new_image():
-    newfilename = str(uuid4())
+@socketio.on('message')
+def handle_message(data):
+    print("Received message: ", data)
 
-    f = request.files["file"]
-    f.save(f"static/storage/{newfilename}.png")
-    return ('', 204)
+@socketio.on('stroke')
+def handle_stroke(data):
+    print("Received stroke: ", data)
+    #socketio.sleep(5)
+    print("Sending stroke back")
+    emit('stroke', data, broadcast=True)
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+if __name__ == '__main__':
+    socketio.run(app, host="0.0.0.0", debug=True)
