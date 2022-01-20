@@ -18,16 +18,16 @@ def hello_world():
 def on_connect(auth):
     print("Someone connected: ", auth)
 
+# TODO: chat function ?
 @socketio.on('message')
 def handle_message(data):
     print("Received message: ", data)
 
 @socketio.on('stroke')
 def handle_stroke(data):
-    print("Received stroke: ", data)
+    # add stroke reverb
     #socketio.sleep(5)
-    print("Sending stroke back")
     emit('stroke', data, broadcast=True)
 
 if __name__ == '__main__':
-    socketio.run(app, host="0.0.0.0", debug=True)
+    socketio.run(app, host="0.0.0.0", debug=False)

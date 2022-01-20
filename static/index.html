@@ -8,7 +8,7 @@
         #container {
             position: relative;
         }
-        
+
         canvas {
             border: 1px solid #000;
             position: absolute;
@@ -31,7 +31,7 @@
 
                 context.globalAlpha = 0.5;
 
-                socket.on('stroke', function(stroke) {
+                socket.on('stroke', function (stroke) {
                     console.log("received stroke: ", stroke);
                     console.log("Drawing on context: ", context, " canvas: ", canvas);
                     context.beginPath();
@@ -51,14 +51,14 @@
             })();
 
             /*** foreground canvas stuff ***/
-            (() => {    
+            (() => {
                 let canvas = document.getElementById('layFG');
                 let context = canvas.getContext('2d');
                 context.globalAlpha = 0.5;
 
                 console.log("Drawing on context: ", context, " canvas: ", canvas);
 
-                let current_move = {"active": false, data: []};
+                let current_move = { "active": false, data: [] };
 
                 canvas.addEventListener('mousedown', (ev) => {
                     // start drawing
@@ -67,7 +67,7 @@
 
                     // start recording move
                     current_move.active = true;
-                    current_move.data.push({"x":ev.offsetX, "y":ev.offsetY});
+                    current_move.data.push({ "x": ev.offsetX, "y": ev.offsetY });
                 }, false);
 
                 /* continue recording move if active */
@@ -78,7 +78,7 @@
                         context.stroke();
 
                         // continue recording
-                        current_move.data.push({"x":ev.offsetX, "y":ev.offsetY});
+                        current_move.data.push({ "x": ev.offsetX, "y": ev.offsetY });
                     }
                 }, false);
 
@@ -87,9 +87,9 @@
                         // finish drawing
                         context.lineTo(ev.offsetX, ev.offsetY);
                         context.stroke();
-                        
+
                         // finish recording
-                        current_move.data.push({"x":ev.offsetX, "y":ev.offsetY});
+                        current_move.data.push({ "x": ev.offsetX, "y": ev.offsetY });
 
                         // send stroke
                         socket.emit('stroke', current_move.data);
@@ -111,10 +111,10 @@
     <p>Hold down the mouse button to draw in the rectangle below.</p>
     <div id="container">
         <canvas id="layBG" width="500" height="500" style="z-index: 1;">
-        </canvas> 
+        </canvas>
         <canvas id="layFG" width="500" height="500" style="z-index: 2;">
         </canvas>
-  </div>
+    </div>
     <input type="button" id="clearbutton" value="Clear canvas" />
 </body>
 
