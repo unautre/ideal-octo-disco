@@ -60,36 +60,52 @@
 
                 let current_move = { "active": false, data: [] };
 
-                canvas.addEventListener('mousedown', (ev) => {
+                let startMove = (x, y) => {
                     // start drawing
                     context.beginPath();
-                    context.moveTo(ev.offsetX, ev.offsetX);
+                    context.moveTo(x, y);
 
                     // start recording move
                     current_move.active = true;
-                    current_move.data.push({ "x": ev.offsetX, "y": ev.offsetY });
+                    current_move.data.push({ "x": x, "y": y });
+                }
+                canvas.addEventListener('mousedown', (ev) => {
+                    startMove(ev.offsetX, ev.offsetY);
+                }, false);
+                canvas.addEventListener('touchstart', (ev) => {
+                    let canvasRect = canvas.getBoundingClientRect();
+                    let touch = ev.touches.item(0);
+                    startMove(touch.clientX - canvasRect.x, touch.clientY - canvasRect.y);
                 }, false);
 
                 /* continue recording move if active */
-                canvas.addEventListener('mousemove', (ev) => {
+                let continueMove = (x, y) => {
                     if (current_move.active) {
                         // continue drawing
-                        context.lineTo(ev.offsetX, ev.offsetY);
+                        context.lineTo(x, y);
                         context.stroke();
 
                         // continue recording
-                        current_move.data.push({ "x": ev.offsetX, "y": ev.offsetY });
+                        current_move.data.push({ "x": x, "y": y });
                     }
+                }
+                canvas.addEventListener('mousemove', (ev) => {
+                    continueMove(ev.offsetX, ev.offsetY);
+                }, false);
+                canvas.addEventListener('touchmove', (ev) => {
+                    let canvasRect = canvas.getBoundingClientRect();
+                    let touch = ev.touches.item(0);
+                    continueMove(touch.clientX - canvasRect.x, touch.clientY - canvasRect.y);
                 }, false);
 
-                canvas.addEventListener('mouseup', (ev) => {
+                let stopMove = (x, y) => {
                     if (current_move.active) {
                         // finish drawing
-                        context.lineTo(ev.offsetX, ev.offsetY);
+                        context.lineTo(x, y);
                         context.stroke();
 
                         // finish recording
-                        current_move.data.push({ "x": ev.offsetX, "y": ev.offsetY });
+                        current_move.data.push({ "x": x, "y": y });
 
                         // send stroke
                         socket.emit('stroke', current_move.data);
@@ -101,6 +117,14 @@
                         // clear rect
                         context.clearRect(0, 0, canvas.width, canvas.height);
                     }
+                }
+                canvas.addEventListener('mouseup', (ev) => {
+                    stopMove(ev.offsetX, ev.offsetY);
+                }, false);
+                canvas.addEventListener('touchend', (ev) => {
+                    let canvasRect = canvas.getBoundingClientRect();
+                    let touch = ev.touches.item(0);
+                    stopMove(touch.clientX - canvasRect.x, touch.clientY - canvasRect.y);
                 }, false);
             })();
         });
